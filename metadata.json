@@ -1,0 +1,6 @@
+{
+  "name": "FaceAuth Attendance",
+  "description": "An e-face verification attendance system that uses the camera to register and verify users for clocking in.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": []
+}
