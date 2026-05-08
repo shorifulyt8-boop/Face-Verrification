@@ -1,6 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiObj: GoogleGenAI | null = null;
+
+function getAi(): GoogleGenAI {
+  if (!aiObj) {
+    // Attempt to use either VITE_GEMINI_API_KEY or process.env.GEMINI_API_KEY
+    const key = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+    if (!key) {
+      throw new Error("Missing Gemini API Key. Please add VITE_GEMINI_API_KEY in your Vercel Environment Variables.");
+    }
+    aiObj = new GoogleGenAI({ apiKey: key });
+  }
+  return aiObj;
+}
 
 export interface IdentificationResult {
   match: boolean;
@@ -32,6 +44,7 @@ export async function identifyFace(
   parts.push({ text: "Return true for 'match' ONLY if the VERIFICATION IMAGE is definitively the same person as ONE of the REFERENCE IMAGES. If match is true, provide that person's exact User ID in 'matchedUserId'." });
 
   try {
+    const ai = getAi();
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [{ role: "user", parts }],
