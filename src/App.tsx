@@ -44,7 +44,7 @@ export default function App() {
         const { data: usersData, error: usersError } = await supabase.from('users').select('*').order('registered_at', { ascending: false });
         
         if (usersError) {
-          if (usersError.code === '42P01') {
+          if (usersError.code === '42P01' || usersError.code === 'PGRST106' || usersError.message?.includes('schema cache')) {
             setSupabaseError('The required tables do not exist in your Supabase database. Please set them up.');
             return;
           } else {
@@ -108,7 +108,7 @@ export default function App() {
       });
 
       if (error) {
-        if (error.code === '42P01') {
+        if (error.code === '42P01' || error.code === 'PGRST106' || error.message?.includes('schema cache')) {
           setSupabaseError('Database tables not set up.');
           setIsProcessing(false);
           return;
@@ -158,7 +158,7 @@ export default function App() {
         });
 
         if (logError) {
-          if (logError.code === '42P01') {
+          if (logError.code === '42P01' || logError.code === 'PGRST106' || logError.message?.includes('schema cache')) {
             setSupabaseError('Database tables not set up.');
           } else {
             console.error("Failed to save log:", logError);
@@ -194,7 +194,7 @@ export default function App() {
         });
 
         if (logError2) {
-          if (logError2.code === '42P01') {
+          if (logError2.code === '42P01' || logError2.code === 'PGRST106' || logError2.message?.includes('schema cache')) {
             setSupabaseError('Database tables not set up.');
           } else {
             console.error("Failed to save log:", logError2);
@@ -286,6 +286,9 @@ alter table logs disable row level security;`;
             
             <p className="text-slate-300 mb-4 font-sans text-sm leading-relaxed">
               To complete the integration, please run the following SQL script in your Supabase project's SQL Editor. This will create the required <strong>users</strong> and <strong>logs</strong> tables.
+            </p>
+            <p className="text-amber-400 mb-6 font-sans text-xs bg-amber-400/10 p-3 rounded-lg border border-amber-400/20">
+              <strong>Note:</strong> If you have already run this SQL and are still seeing this message, Supabase might be caching the schema. You can fix this by going to your Supabase Dashboard -&gt; Settings -&gt; API, and clicking <strong>Reload Cache</strong> under "Schema Cache", or just waiting a minute and reloading this page.
             </p>
 
             <div className="relative group rounded-xl overflow-hidden mb-6">
