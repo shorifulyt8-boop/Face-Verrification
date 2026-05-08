@@ -108,9 +108,13 @@ export default function App() {
       });
 
       if (error) {
-        if (error.code === '42P01') setSupabaseError('Database tables not set up.');
+        if (error.code === '42P01') {
+          setSupabaseError('Database tables not set up.');
+          setIsProcessing(false);
+          return;
+        }
         console.error('Failed to save user:', error);
-        alert('Failed to save to database. Check console.');
+        alert(`Failed to save to database: ${error.message}`);
       } else {
         setUsers(prev => [newUser, ...prev]);
         setAdminForm({ name: '', department: '', role: '' });
@@ -144,7 +148,7 @@ export default function App() {
         };
 
         // Save log to Supabase
-        await supabase.from('logs').insert({
+        const { error: logError } = await supabase.from('logs').insert({
           id: newLog.id,
           name: newLog.name,
           time: newLog.time.toISOString(),
@@ -152,6 +156,15 @@ export default function App() {
           message: newLog.message,
           confidence: newLog.confidence
         });
+
+        if (logError) {
+          if (logError.code === '42P01') {
+            setSupabaseError('Database tables not set up.');
+          } else {
+            console.error("Failed to save log:", logError);
+            alert(`Failed to save log to database: ${logError.message}`);
+          }
+        }
 
         setLogs(prev => [newLog, ...prev]);
 
@@ -171,7 +184,7 @@ export default function App() {
           confidence: 0
         };
         
-        await supabase.from('logs').insert({
+        const { error: logError2 } = await supabase.from('logs').insert({
           id: newLog.id,
           name: newLog.name,
           time: newLog.time.toISOString(),
@@ -179,6 +192,14 @@ export default function App() {
           message: newLog.message,
           confidence: newLog.confidence
         });
+
+        if (logError2) {
+          if (logError2.code === '42P01') {
+            setSupabaseError('Database tables not set up.');
+          } else {
+            console.error("Failed to save log:", logError2);
+          }
+        }
         
         setLogs(prev => [newLog, ...prev]);
       } finally {
